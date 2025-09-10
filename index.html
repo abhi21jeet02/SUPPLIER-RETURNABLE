@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Supplier Returnable Tracker</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- PWA manifest + theme -->
   <link rel="manifest" href="manifest.json">
@@ -42,15 +42,16 @@
     }
     label {
       margin-bottom: 5px;
-      font-weight: 500;
-      font-size: 16px;
       font-weight: 600;
+      font-size: 16px;
+      display: block;
     }
     select, input {
       width: 100%;
       padding: 8px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      box-sizing: border-box;
     }
     input[type="number"] {
       font-size: 20px;      
@@ -62,19 +63,83 @@
       width: 100%;
       box-sizing: border-box;
     }
-    input:focus, select:focus {
+    input:focus {
       outline: none;
       border-color: #2ecc71;
       box-shadow: 0 0 5px #2ecc71;
     }
-    /* Color-coded backgrounds */
-    #bin { background: #fffbe6; } /* light yellow */
-    #trolley { background: #e6f7ff; } /* light blue */
-    #ppBox { background: #eaffea; } /* light green */
-    #pallets { background: #fff2e6; } /* light orange */
-    #other { background: #f5f5f5; } /* light gray */
 
-    /* Responsive for mobile */
+    /* Supplier Search - Professional Look */
+    .autocomplete-container {
+      position: relative;
+      width: 100%;
+    }
+
+    #supplierSearch {
+      width: 100%;
+      padding: 12px 40px 12px 14px; /* space for icon */
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #fff;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+      transition: all 0.2s ease-in-out;
+      box-sizing: border-box;
+    }
+
+    #supplierSearch:focus {
+      border-color: #2ecc71;
+      box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+      outline: none;
+    }
+
+    .autocomplete-container::after {
+      content: "";
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23888" viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"/></svg>') no-repeat center;
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    #supplierList {
+      position: absolute;
+      top: 105%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    #supplierList div {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    #supplierList div:hover {
+      background: #f0f6ff;
+    }
+
+    /* Color-coded backgrounds */
+    #bin { background: #fffbe6; }
+    #trolley { background: #e6f7ff; }
+    #ppBox { background: #eaffea; }
+    #pallets { background: #fff2e6; }
+    #other { background: #f5f5f5; }
+
+    /* Responsive */
     @media (max-width: 600px) {
       form { grid-template-columns: 1fr; }
       input[type="number"] { font-size: 22px; }
@@ -94,15 +159,10 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    button:hover {
-      background: #2980b9;
-    }
-    .danger {
-      background: #e74c3c;
-    }
-    .danger:hover {
-      background: #c0392b;
-    }
+    button:hover { background: #2980b9; }
+    .danger { background: #e74c3c; }
+    .danger:hover { background: #c0392b; }
+
     table {
       width: 100%;
       margin-top: 20px;
@@ -113,20 +173,14 @@
       padding: 8px;
       text-align: center;
     }
-    th {
-      background: #3498db;
-      color: #fff;
-    }
+    th { background: #3498db; color: #fff; }
 
-    /* Large submit button */
     .full-width button[type="submit"] {
       font-size: 20px;
       padding: 15px;
       width: 100%;
       border-radius: 10px;
     }
-
-    /* Single voice mic button */
     .single-voice-btn {
       margin: 10px 0;
       background: #2ecc71;
@@ -138,10 +192,7 @@
       font-size: 18px;
       width: 100%;
     }
-    .single-voice-btn:hover {
-      background: #27ae60;
-    }
-
+    .single-voice-btn:hover { background: #27ae60; }
   </style>
 </head>
 <body>
@@ -149,36 +200,22 @@
   <div class="container">
     <form id="entryForm">
       <div>
-        <label for="supplier">Supplier</label>
-        <select id="supplier" required></select>
+        <label for="supplierSearch">Supplier</label>
+        <div class="autocomplete-container">
+          <input type="text" id="supplierSearch" placeholder="Search supplier..." required />
+          <div id="supplierList"></div>
+        </div>
       </div>
 
-      <div>
-        <label for="trolley">Trolley</label>
-        <input type="number" id="trolley" min="0">
-      </div>
-      <div>
-        <label for="bin">Bin</label>
-        <input type="number" id="bin" min="0">
-      </div>
-      <div>
-        <label for="ppBox">PP Box</label>
-        <input type="number" id="ppBox" min="0">
-      </div>
-      <div>
-        <label for="pallets">Pallets</label>
-        <input type="number" id="pallets" min="0">
-      </div>
-      <div>
-        <label for="other">Other</label>
-        <input type="number" id="other" min="0">
-      </div>
+      <div><label for="trolley">Trolley</label><input type="number" id="trolley" min="0"></div>
+      <div><label for="bin">Bin</label><input type="number" id="bin" min="0"></div>
+      <div><label for="ppBox">PP Box</label><input type="number" id="ppBox" min="0"></div>
+      <div><label for="pallets">Pallets</label><input type="number" id="pallets" min="0"></div>
+      <div><label for="other">Other</label><input type="number" id="other" min="0"></div>
 
-      <!-- Single mic button -->
       <div class="full-width">
         <button type="button" class="single-voice-btn" onclick="startVoiceAll()">🎤 Speak Quantities</button>
       </div>
-
       <div class="full-width">
         <button type="submit">Add Entry</button>
         <button type="button" onclick="sendToGoogle()">Send to Google Sheet</button>
@@ -197,6 +234,7 @@
           <th>PP Box</th>
           <th>Pallets</th>
           <th>Other</th>
+          <th>Row Total</th> <!-- ✅ Added -->
           <th>Actions</th>
         </tr>
       </thead>
@@ -209,6 +247,7 @@
           <th id="totalPPBox">0</th>
           <th id="totalPallets">0</th>
           <th id="totalOther">0</th>
+          <th id="grandRowTotal">0</th> <!-- ✅ Added -->
           <th>-</th>
         </tr>
       </tfoot>
@@ -216,10 +255,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
   <script>
-    const suppliers = [
-     "A G INDUSTRIES PVT LTD",
+    const suppliers = [     "A G INDUSTRIES PVT LTD",
 "A.G. PREMIUM STEERINGS AND MOULDINGS PRIVATE LIMITED",
 "A.J. AUTO PRIVATE LIMITED",
 "ACCURA VALVES PRIVATE LIMITED",
@@ -382,61 +419,52 @@
 "YAZAKI INDIA PRIVATE LIMITED",
 "YOGESH ENGINEERING WORKS",
 "ZF RANA"
+]; // shortened for demo
 
-    ];
+    const supplierSearch = document.getElementById("supplierSearch");
+    const supplierList = document.getElementById("supplierList");
 
-    const supplierSelect = document.getElementById("supplier");
-    suppliers.forEach(s => {
-      let option = document.createElement("option");
-      option.value = s;
-      option.textContent = s;
-      supplierSelect.appendChild(option);
+    supplierSearch.addEventListener("input", function () {
+      const val = this.value.toLowerCase();
+      supplierList.innerHTML = "";
+      if (!val) { supplierList.style.display = "none"; return; }
+      const filtered = suppliers.filter(s => s.toLowerCase().includes(val));
+      if (filtered.length === 0) {
+        const newDiv = document.createElement("div");
+        newDiv.textContent = `Add "${this.value}"`;
+        newDiv.onclick = () => { supplierSearch.value = this.value; supplierList.style.display = "none"; };
+        supplierList.appendChild(newDiv);
+      } else {
+        filtered.forEach(supplier => {
+          const div = document.createElement("div");
+          div.textContent = supplier;
+          div.onclick = () => { supplierSearch.value = supplier; supplierList.style.display = "none"; };
+          supplierList.appendChild(div);
+        });
+      }
+      supplierList.style.display = "block";
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!supplierSearch.contains(e.target) && !supplierList.contains(e.target)) {
+        supplierList.style.display = "none";
+      }
     });
 
     let data = JSON.parse(localStorage.getItem("returnableData")) || [];
     renderTable();
 
-    // Smart single microphone for all fields
-    function startVoiceAll() {
-      if (!('webkitSpeechRecognition' in window)) {
-        alert("Your browser does not support Speech Recognition");
-        return;
-      }
-      const recognition = new webkitSpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.start();
-
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript.toLowerCase();
-        console.log("Spoken:", transcript);
-
-        // Match all numbers with keywords
-        const regex = /(\d+)\s*(trolley|bin|pp box|pallets?|other)/g;
-        let match;
-        while ((match = regex.exec(transcript)) !== null) {
-          const value = parseInt(match[1]);
-          const field = match[2].replace(' ', '').toLowerCase();
-          if (field === 'trolley') document.getElementById('trolley').value = value;
-          else if (field === 'bin') document.getElementById('bin').value = value;
-          else if (field === 'ppbox') document.getElementById('ppBox').value = value;
-          else if (field === 'pallet' || field === 'pallets') document.getElementById('pallets').value = value;
-          else if (field === 'other') document.getElementById('other').value = value;
-        }
-      };
-
-      recognition.onerror = function(event) {
-        console.error("Speech recognition error:", event.error);
-      };
-    }
-
+    // Form submit
     document.getElementById("entryForm").addEventListener("submit", function(e){
       e.preventDefault();
-      const supplier = document.getElementById("supplier").value;
+      const supplier = supplierSearch.value.trim();
       const trolley = +(document.getElementById("trolley").value || 0);
       const bin = +(document.getElementById("bin").value || 0);
       const ppBox = +(document.getElementById("ppBox").value || 0);
       const pallets = +(document.getElementById("pallets").value || 0);
       const other = +(document.getElementById("other").value || 0);
+
+      if(!supplier) return alert("Please enter supplier");
 
       let existing = data.find(d => d.supplier === supplier);
       if(existing){
@@ -456,6 +484,7 @@
       const tbody = document.querySelector("#dataTable tbody");
       tbody.innerHTML = "";
       let totals = {trolley:0, bin:0, ppBox:0, pallets:0, other:0};
+      let grandRowTotal = 0;
 
       data.forEach((row, index) => {
         totals.trolley += row.trolley;
@@ -463,6 +492,9 @@
         totals.ppBox += row.ppBox;
         totals.pallets += row.pallets;
         totals.other += row.other;
+
+        const rowTotal = row.trolley + row.bin + row.ppBox + row.pallets + row.other;
+        grandRowTotal += rowTotal;
 
         let tr = document.createElement("tr");
         tr.innerHTML = `
@@ -473,6 +505,7 @@
           <td>${row.ppBox}</td>
           <td>${row.pallets}</td>
           <td>${row.other}</td>
+          <td><strong>${rowTotal}</strong></td>
           <td>
             <button onclick="editRow(${index})">✏️</button>
             <button class="danger" onclick="deleteRow(${index})">🗑️</button>
@@ -486,13 +519,14 @@
       document.getElementById("totalPPBox").textContent = totals.ppBox;
       document.getElementById("totalPallets").textContent = totals.pallets;
       document.getElementById("totalOther").textContent = totals.other;
+      document.getElementById("grandRowTotal").textContent = grandRowTotal;
 
       localStorage.setItem("returnableData", JSON.stringify(data));
     }
 
     function editRow(index){
       const row = data[index];
-      document.getElementById("supplier").value = row.supplier;
+      supplierSearch.value = row.supplier;
       document.getElementById("trolley").value = row.trolley;
       document.getElementById("bin").value = row.bin;
       document.getElementById("ppBox").value = row.ppBox;
@@ -528,9 +562,10 @@
       }
       const wb = XLSX.utils.book_new();
       const ws_data = [
-        ["S.No","Supplier","Trolley","Bin","PP Box","Pallets","Other"]
+        ["S.No","Supplier","Trolley","Bin","PP Box","Pallets","Other","Row Total"]
       ];
       data.forEach((row,index) => {
+        const rowTotal = row.trolley + row.bin + row.ppBox + row.pallets + row.other;
         ws_data.push([
           index+1,
           row.supplier,
@@ -538,12 +573,16 @@
           row.bin,
           row.ppBox,
           row.pallets,
-          row.other
+          row.other,
+          rowTotal
         ]);
       });
       const ws = XLSX.utils.aoa_to_sheet(ws_data);
       XLSX.utils.book_append_sheet(wb, ws, "Returnables");
-      XLSX.writeFile(wb, "Supplier_Returnables.xlsx");
-    }
+     const d = new Date();
+const today = `${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`;
+
+  XLSX.writeFile(wb, `${today}.xlsx`);  }
   </script>
 </body>
+</html>

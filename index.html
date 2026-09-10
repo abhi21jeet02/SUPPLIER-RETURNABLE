@@ -1,588 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Supplier Returnable Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Components</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f4f6f8;
+        }
+        
+        /* Banner Error Box */
+        .alert-error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .alert-error .icon {
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 12px;
+        }
 
-  <!-- PWA manifest + theme -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#3498db">
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(() => console.log("✅ PWA Registered"))
-        .catch(err => console.error("Service Worker failed", err));
-    }
-  </script>
-
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 20px;
-      background: #f9fafc;
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-    label {
-      margin-bottom: 5px;
-      font-weight: 600;
-      font-size: 16px;
-      display: block;
-    }
-    select, input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-    input[type="number"] {
-      font-size: 20px;      
-      font-weight: bold;    
-      text-align: center;   
-      padding: 12px;        
-      border: 2px solid #3498db;
-      border-radius: 8px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    input:focus {
-      outline: none;
-      border-color: #2ecc71;
-      box-shadow: 0 0 5px #2ecc71;
-    }
-
-    /* Supplier Search - Professional Look */
-    .autocomplete-container {
-      position: relative;
-      width: 100%;
-    }
-
-    #supplierSearch {
-      width: 100%;
-      padding: 12px 40px 12px 14px; /* space for icon */
-      border: 2px solid #3498db;
-      border-radius: 8px;
-      font-size: 16px;
-      background: #fff;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
-      transition: all 0.2s ease-in-out;
-      box-sizing: border-box;
-    }
-
-    #supplierSearch:focus {
-      border-color: #2ecc71;
-      box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
-      outline: none;
-    }
-
-    .autocomplete-container::after {
-      content: "";
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="%23888" viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"/></svg>') no-repeat center;
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    #supplierList {
-      position: absolute;
-      top: 105%;
-      left: 0;
-      right: 0;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 0 0 8px 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-      display: none;
-    }
-
-    #supplierList div {
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 14px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    #supplierList div:hover {
-      background: #f0f6ff;
-    }
-
-    /* Color-coded backgrounds */
-    #bin { background: #fffbe6; }
-    #trolley { background: #e6f7ff; }
-    #ppBox { background: #eaffea; }
-    #pallets { background: #fff2e6; }
-    #other { background: #f5f5f5; }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      form { grid-template-columns: 1fr; }
-      input[type="number"] { font-size: 22px; }
-      label { font-size: 18px; }
-    }
-
-    .full-width {
-      grid-column: span 2;
-      text-align: center;
-    }
-    button {
-      background: #3498db;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      margin: 5px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover { background: #2980b9; }
-    .danger { background: #e74c3c; }
-    .danger:hover { background: #c0392b; }
-
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-    }
-    th { background: #3498db; color: #fff; }
-
-    .full-width button[type="submit"] {
-      font-size: 20px;
-      padding: 15px;
-      width: 100%;
-      border-radius: 10px;
-    }
-    .single-voice-btn {
-      margin: 10px 0;
-      background: #2ecc71;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 18px;
-      width: 100%;
-    }
-    .single-voice-btn:hover { background: #27ae60; }
-  </style>
+        /* Form Field Error Example */
+        .form-group {
+            margin-top: 20px;
+            max-width: 300px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            outline: none;
+        }
+        .error-text {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Supplier Returnable Tracker</h1>
-  <div class="container">
-    <form id="entryForm">
-      <div>
-        <label for="supplierSearch">Supplier</label>
-        <div class="autocomplete-container">
-          <input type="text" id="supplierSearch" placeholder="Search supplier..." required />
-          <div id="supplierList"></div>
+
+    <!-- Top Alert Error Banner -->
+    <div class="alert-error">
+        <span class="icon">&#9888;</span>
+        <div>
+            <strong>Error:</strong> Unable to process your request. Please check your network connection and try again.
         </div>
-      </div>
+    </div>
 
-      <div><label for="trolley">Trolley</label><input type="number" id="trolley" min="0"></div>
-      <div><label for="bin">Bin</label><input type="number" id="bin" min="0"></div>
-      <div><label for="ppBox">PP Box</label><input type="number" id="ppBox" min="0"></div>
-      <div><label for="pallets">Pallets</label><input type="number" id="pallets" min="0"></div>
-      <div><label for="other">Other</label><input type="number" id="other" min="0"></div>
+    <!-- Form Field with Error -->
+    <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" value="invalid-email-address">
+        <div class="error-text">Please enter a valid email address.</div>
+    </div>
 
-      <div class="full-width">
-        <button type="button" class="single-voice-btn" onclick="startVoiceAll()">🎤 Speak Quantities</button>
-      </div>
-      <div class="full-width">
-        <button type="submit">Add Entry</button>
-        <button type="button" onclick="sendToGoogle()">Send to Google Sheet</button>
-        <button type="button" onclick="downloadExcel()">Download Excel</button>
-        <button type="button" class="danger" onclick="clearData()">Clear Data</button>
-      </div>
-    </form>
-
-    <table id="dataTable">
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>Supplier</th>
-          <th>Trolley</th>
-          <th>Bin</th>
-          <th>PP Box</th>
-          <th>Pallets</th>
-          <th>Other</th>
-          <th>Row Total</th> <!-- ✅ Added -->
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-      <tfoot>
-        <tr id="summaryRow">
-          <th colspan="2">TOTAL</th>
-          <th id="totalTrolley">0</th>
-          <th id="totalBin">0</th>
-          <th id="totalPPBox">0</th>
-          <th id="totalPallets">0</th>
-          <th id="totalOther">0</th>
-          <th id="grandRowTotal">0</th> <!-- ✅ Added -->
-          <th>-</th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script>
-    const suppliers = [     "A G INDUSTRIES PVT LTD",
-"A.G. PREMIUM STEERINGS AND MOULDINGS PRIVATE LIMITED",
-"A.J. AUTO PRIVATE LIMITED",
-"ACCURA VALVES PRIVATE LIMITED",
-"ACCURATE PRODUCTS CORPORATION PVT LTD",
-"ACCURATE PRODUCTS CORPORATION PVT LTD",
-"ACTIVE CHROMEWELL EXHAUST PRIVATE LIMITED",
-"AJ AUTO PVT LTD",
-"AMALGAMATIONS VALEO CLUTCH PVT. LTD.",
-"ANANDJI HARIDAS AND COMPANY PRIVATE LIMITED",
-"ARAYMOND INDIA PRIVATE LIMITEC-FORMERLY A RAYMOND FASTENERS INDIA PVT. LTD.",
-"ASIAN WIRE FORMING & SPRINGS PVT.LIMITED",
-"ASIAN WIRE FORMING AND SPRINGS PRIVATE LIMITED",
-"ASP SEALING PRODUCTS LIMITED",
-"ATC TIRES PRIVATE LIMITED",
-"ATOP FASTENERS PRIVATE LIMITED",
-"ATOP PRODUCTS PRIVATE LIMITED",
-"AURANGABAD AUTO ENGINEERING PRIVATE LIMITED",
-"AUTO IGNITION LIMITED",
-"AUTO TECH ENGINEERS",
-"B. D. INDUSTRIES(PUNE) PVT. LTD",
-"BALKRISHNA INDUSTRIES LIMITED",
-"BANCO PRODUCTS (INDIA) LIMITED",
-"BAPL ROTOTECH PRIVATE LIMITED",
-"BBL DAIDO PRIVATE LIMITED",
-"BBL DAIDO PVT LTD",
-"BELRISE INDUSTRIES LIMITED (Erstwhile known as Badve Engineering Limited)'",
-"BELRISE INDUSTRIES LIMITED. (ERSTWHILE KNOWN AS BADVE ENGINEERING LIMITED)",
-"BG LI-IN ELECTRICALS LIMITED",
-"BHARAT GEARS LIMITED",
-"BONY POLYMERS PRIVATE LIMITED",
-"BOSCH LIMITED",
-"BSL CASTING PVT LTD",
-"BSL CASTING PVT LTD",
-"BSL CASTINGS (P) LTD.",
-"BUCHER HYDRAULICS PRIVATE LIMITED",
-"CAPARO ENGG HARDWARE",
-"CAPARO ENGINEERING INDIA LIMITED",
-"CASTMASTER INDUSTRIES PRIVATE LIMITED",
-"CCTY BEARING INDIA PVT LTD",
-"CIRCLIPS TECHNOLOGIE PRIVATE LIMITED",
-"CIRCLIPS TECHNOLOGIE PVT. LTD.",
-"CONTITECH INDIA PRIVATE LIMITED",
-"CRAFTSMEN LABELMAKERS PVT LTD.",
-"DEUSCH MOTOCOMP PRIVATE LIMITED",
-"DONALDSON INDIA FILTER SYSTEMS PVT LTD",
-"EMDET ENGINEERS PVT LTD",
-"EMDET JAMSHEDPUR PRIVATE LIMITED",
-"EXIDE INDUSTRIES LIMITED",
-"FIEM INDUSTRIES LTD.",
-"GEE AAR GRAPHICS",
-"GHATGE PATIL INDUSTRIES LTD",
-"GHAZIABAD PRECISION PRODUCTS PRIVATE LIMITED",
-"GRAEPEL PERFORATIONS INDIA PRIVATE LIMITED",
-"GROZ ENGINEERING TOOLS PRIVATE LIMITED",
-"GROZ ENGINEERING TOOLS PVT LTD",
-"HAPPY STEELS PRIVATE LIMITED",
-"HARITA SEATING SYSTEMS LTD",
-"HARYANA INDUSTRIES",
-"HILUX AUTOELECTRIC PVT.LTD.",
-"HI-LUX AUTOMOTIVE PRIVATE LIMITED",
-"IMAGE SYNERGY EKXPLOR PRIVATE LIMITED FORMERLY IMAGE LABELS PRIVATE LIMITED",
-"INDICA INDUSTRIES PRIVATE LIMITED",
-"INDICATORS MANUFACTURING COMPANY",
-"INDO AUTOTECH LIMITED",
-"INDUSTRIAL ENGINEERING SYNDICATE",
-"JAYEM AUTO INDUSTRIES PRIVATE LIMITED",
-"JBM AUTO LIMITED",
-"JBM INDUSTRIES LIMITED",
-"JM FRICTECH INDIA PRIVATE LIMITED",
-"JM FRICTECH INDIA PVT LTD",
-"KIRLOSKAR FERROUS INDUSTRIES LTD.",
-"KRISHNA MARUTI LTD",
-"KUBOTA",
-"KUBOTA CORPORATION",
-"KUBOTA ENGINE (THAILAND) CO LTD",
-"KUBOTA MACHINERY TRADING CO LTD.",
-"LUBOIL FILTRATION SYSTEMS PRIVATE LIMITED",
-"MACUREX SENSORS PVT. LTD.",
-"MD INDUSTRIES",
-"MILESTONE GEARS PRIVATE LIMITED",
-"MINDA INDUSTRIES LIMITED",
-"MITA INDIA PRIVATE LIMITED",
-"MRF LIMITED",
-"MSL DRIVELINE SYSTEMS LIMITED",
-"MT AUTOCRAFT",
-"MVD AUTO COMPONENTS PVT LTD",
-"NACHI TECHNOLOGY INDIA PRIVATE LIMITED",
-"NAPINO AUTO AND ELECTRONICS LIMITED",
-"NATESAN SYNCHROCONES PRIVATE LIMITED",
-"NATIONAL ENGINEERING INDUSTRIES LIMITED",
-"NATIONAL ENGINEERING INDUSTRIES LTD",
-"NEOLITE ZKW LIGHTINGS PRIVATE LIMITED",
-"NETPLAST PRIVATE LIMITED",
-"NETPLAST PVT LTD",
-"NEW ALLENBERRY WORKS",
-"NHB BALL & ROLLER LTD",
-"NRB BEARINGS LIMITED",
-"NTN BEARING INDIA PRIVATE LIMITED",
-"OGNIBENE INDIA PVT. LTD.",
-"OMCO ENTERPRISES PVT LIMITED",
-"OMCO ENTERPRISES PVT LTD",
-"ORBIT BEARINGS INDIA PVT LTD",
-"OSHO TOOLS PVT LTD",
-"PADMAVATI CASTINGS PVT. LTD.",
-"PAVNA AUTO ENGINEERING PVT. LTD.",
-"POOJA AUTO INDUSTRIES",
-"PRECISION INDUSTRIAL FASTENERS",
-"PREMIER SEALS (I) PRIVATE LIMITED",
-"PRICOL LIMITED",
-"PRIMA PRIVATE LIMITED",
-"PRITIKA AUTO INDUSTRIES LIMITED",
-"PYN PRECISION COMPONENTS",
-"QH TALBROS PRIVATE LIMITED",
-"R G BRONZE MFG. COMPANY PVT. LIMITED",
-"RACL GEARTECH LIMITED",
-"RAMCO STEELS PRIVATE LIMITED",
-"RANE (MADRAS) LIMITED",
-"RELIABLE MECHATRONICS PRIVATE LIMITED",
-"RELIABLE MECHATRONICS PVT LTD",
-"RIKKI  PLASTIC PRIVATE LIMITED",
-"RIKKI PLASTIC PRIVATE LIMITED",
-"SADHU FORGING LIMITED",
-"SADHU FORGING LTD",
-"SAKET FABS PRIVATE LIMITED",
-"SAKET FABS PVT. LTD.",
-"SAN AUTOMOTIVE INDUSTRIES PVT LTD",
-"SANGKAJ TECHNOLOGIES PRIVATE LIMITED - FORMERLY AURANGABAD AUTO ENGINEERING PRIVATE LIMITED",
-"SCHAEFFLER INDIA LIMITED",
-"SEBROS INDUSTRIES PVT. LTD.",
-"SHRIRAM FOUNDRY PRIVATE LIMITED",
-"SHRIRAM FOUNDRY PVT LTD",
-"SIAM KUBOTA CORPORATION CO. LTD.",
-"SIETZ TECHNOLOGIES INDIA PRIVATE LIMITED",
-"SIETZ TECHNOLOGIES INDIA PVT. LTD.",
-"SINGHAL SINTERED PRIVATE LIMITED",
-"SONA BLW PRECISION FORGINGS LIMITED",
-"SOUND CASTINGS PVT. LTD.",
-"STERLING TOOLS LIMITED",
-"SUDTRAC LINKAGES PRIVATE LIMITED",
-"SUNDRAM FASTENERS LTD",
-"SUPER AUTO ELECTRICALS PVT LTD",
-"SUSPA PNEUMATICS INDIA PRIVATE LIMITED",
-"SYNNOVA GEARS & TRANSMISSION PVT. LTD.",
-"TATA AUTOCOMP SYSTEMS LIMITED",
-"TEXSPIN BEARINGS LTD",
-"TRELLEBORG",
-"UNIFLEX PRECISION PRODUCTS PRIVATE LIMITED",
-"UNIPARTS INDIA LTD",
-"UNITED TYREKRAFTS PRIVATE LIMITED",
-"UNIVERSAL AUTO FOUNDRY LIMITED",
-"UNIVERSAL AUTO FOUNDRY LIMITED",
-"VICTORA AUTO PRIVATE LIMITED",
-"VICTURA TECHNOLOGIES PRIVATE LIMITED FORMERLY VICTORA AUTO PRIVATE LIMITED",
-"VISHWAS INDUSTRIAL AUTOTECH PRIVATE LIMITED",
-"VISHWAS INDUSTRIAL AUTOTECH PVT. LTD.",
-"VI-SON CABLES PVT. LTD.",
-"WHEELS INDIA LIMITED",
-"WIPRO ENTERPRISES PRIVATE LIMITED",
-"YAMAN INDUSTRIES",
-"YAZAKI INDIA PRIVATE LIMITED",
-"YOGESH ENGINEERING WORKS",
-"ZF RANA"
-]; // shortened for demo
-
-    const supplierSearch = document.getElementById("supplierSearch");
-    const supplierList = document.getElementById("supplierList");
-
-    supplierSearch.addEventListener("input", function () {
-      const val = this.value.toLowerCase();
-      supplierList.innerHTML = "";
-      if (!val) { supplierList.style.display = "none"; return; }
-      const filtered = suppliers.filter(s => s.toLowerCase().includes(val));
-      if (filtered.length === 0) {
-        const newDiv = document.createElement("div");
-        newDiv.textContent = `Add "${this.value}"`;
-        newDiv.onclick = () => { supplierSearch.value = this.value; supplierList.style.display = "none"; };
-        supplierList.appendChild(newDiv);
-      } else {
-        filtered.forEach(supplier => {
-          const div = document.createElement("div");
-          div.textContent = supplier;
-          div.onclick = () => { supplierSearch.value = supplier; supplierList.style.display = "none"; };
-          supplierList.appendChild(div);
-        });
-      }
-      supplierList.style.display = "block";
-    });
-
-    document.addEventListener("click", function (e) {
-      if (!supplierSearch.contains(e.target) && !supplierList.contains(e.target)) {
-        supplierList.style.display = "none";
-      }
-    });
-
-    let data = JSON.parse(localStorage.getItem("returnableData")) || [];
-    renderTable();
-
-    // Form submit
-    document.getElementById("entryForm").addEventListener("submit", function(e){
-      e.preventDefault();
-      const supplier = supplierSearch.value.trim();
-      const trolley = +(document.getElementById("trolley").value || 0);
-      const bin = +(document.getElementById("bin").value || 0);
-      const ppBox = +(document.getElementById("ppBox").value || 0);
-      const pallets = +(document.getElementById("pallets").value || 0);
-      const other = +(document.getElementById("other").value || 0);
-
-      if(!supplier) return alert("Please enter supplier");
-
-      let existing = data.find(d => d.supplier === supplier);
-      if(existing){
-        existing.trolley += trolley;
-        existing.bin += bin;
-        existing.ppBox += ppBox;
-        existing.pallets += pallets;
-        existing.other += other;
-      } else {
-        data.push({supplier, trolley, bin, ppBox, pallets, other});
-      }
-      renderTable();
-      this.reset();
-    });
-
-    function renderTable(){
-      const tbody = document.querySelector("#dataTable tbody");
-      tbody.innerHTML = "";
-      let totals = {trolley:0, bin:0, ppBox:0, pallets:0, other:0};
-      let grandRowTotal = 0;
-
-      data.forEach((row, index) => {
-        totals.trolley += row.trolley;
-        totals.bin += row.bin;
-        totals.ppBox += row.ppBox;
-        totals.pallets += row.pallets;
-        totals.other += row.other;
-
-        const rowTotal = row.trolley + row.bin + row.ppBox + row.pallets + row.other;
-        grandRowTotal += rowTotal;
-
-        let tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${index+1}</td>
-          <td>${row.supplier}</td>
-          <td>${row.trolley}</td>
-          <td>${row.bin}</td>
-          <td>${row.ppBox}</td>
-          <td>${row.pallets}</td>
-          <td>${row.other}</td>
-          <td><strong>${rowTotal}</strong></td>
-          <td>
-            <button onclick="editRow(${index})">✏️</button>
-            <button class="danger" onclick="deleteRow(${index})">🗑️</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("totalTrolley").textContent = totals.trolley;
-      document.getElementById("totalBin").textContent = totals.bin;
-      document.getElementById("totalPPBox").textContent = totals.ppBox;
-      document.getElementById("totalPallets").textContent = totals.pallets;
-      document.getElementById("totalOther").textContent = totals.other;
-      document.getElementById("grandRowTotal").textContent = grandRowTotal;
-
-      localStorage.setItem("returnableData", JSON.stringify(data));
-    }
-
-    function editRow(index){
-      const row = data[index];
-      supplierSearch.value = row.supplier;
-      document.getElementById("trolley").value = row.trolley;
-      document.getElementById("bin").value = row.bin;
-      document.getElementById("ppBox").value = row.ppBox;
-      document.getElementById("pallets").value = row.pallets;
-      document.getElementById("other").value = row.other;
-      data.splice(index,1);
-      renderTable();
-    }
-
-    function deleteRow(index){
-      if(confirm("Delete this entry?")){
-        data.splice(index,1);
-        renderTable();
-      }
-    }
-
-    function sendToGoogle(){
-      alert("Data would be sent to Google Sheet:\n" + JSON.stringify(data, null, 2));
-    }
-
-    function clearData(){
-      if(confirm("Are you sure you want to clear all today's data?")){
-        data = [];
-        localStorage.removeItem("returnableData");
-        renderTable();
-      }
-    }
-
-    function downloadExcel() {
-      if(data.length === 0){
-        alert("No data to download!");
-        return;
-      }
-      const wb = XLSX.utils.book_new();
-      const ws_data = [
-        ["S.No","Supplier","Trolley","Bin","PP Box","Pallets","Other","Row Total"]
-      ];
-      data.forEach((row,index) => {
-        const rowTotal = row.trolley + row.bin + row.ppBox + row.pallets + row.other;
-        ws_data.push([
-          index+1,
-          row.supplier,
-          row.trolley,
-          row.bin,
-          row.ppBox,
-          row.pallets,
-          row.other,
-          rowTotal
-        ]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(ws_data);
-      XLSX.utils.book_append_sheet(wb, ws, "Returnables");
-     const d = new Date();
-const today = `${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`;
-
-  XLSX.writeFile(wb, `${today}.xlsx`);  }
-  </script>
 </body>
 </html>
